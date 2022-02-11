@@ -37,13 +37,15 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-    useLayoutEffect(async () => {
-        const { ethereum } = window;
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        let initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
-        setBalance(initialBalance)
+    useLayoutEffect( () => {
+        const fetchInitialData = async () => {
+            const { ethereum } = window;
+            const provider = new ethers.providers.Web3Provider(ethereum);
+            let initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+            setBalance(initialBalance)
+        }
+        fetchInitialData()
     },[]);
-
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
