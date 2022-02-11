@@ -1,18 +1,17 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import './App.css';
-import contract                from './contracts/NFTCollectible.json';
-import { ethers }              from 'ethers';
+import contract                                 from './contracts/NFTCollectible.json';
+import { ethers }                               from 'ethers';
 
 const contractAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71";
 const abi             = contract.abi;
-
-
 
 function App() {
 
     const [ currentAccount, setCurrentAccount ] = useState(null);
     const [ paymentInfo, setPaymentInfo ]       = useState({});
     const [ balance, setBalance ]               = useState('')
+    const [ myAddress, setMyAddress ]           = useState('');
     const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
     const [ nonce, from, chainId ]              = transitionData;
 
@@ -37,15 +36,25 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-    useLayoutEffect( () => {
+    useLayoutEffect(() => {
         const fetchInitialData = async () => {
-            const { ethereum } = window;
-            const provider = new ethers.providers.Web3Provider(ethereum);
-            let initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
-            setBalance(initialBalance)
+
+            // Crete Provider
+            const { ethereum }  = window;
+            const provider      = new ethers.providers.Web3Provider(ethereum);
+
+            // Get Current Address Wallet
+            const signer        = provider.getSigner()
+            const currentWallet = await signer.getAddress();
+            setMyAddress(currentWallet)
+
+            // Get Balance of Wallet
+            const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+            const formatBalance  = ethers.utils.formatEther(initialBalance)
+            setBalance(formatBalance)
         }
         fetchInitialData()
-    },[]);
+    }, [ myAddress, balance ]);
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
@@ -156,7 +165,7 @@ function App() {
                         <div>
                             { currentAccount ? mintNftButton() : connectWalletButton() }
                         </div>
-                        <div>
+                        <>
                             {
                                 nonce && from && chainId !== undefined ?
                                     <div className={ '' }>
@@ -165,7 +174,12 @@ function App() {
                                     </div>
                                     : ''
                             }
+                        </>
+                        <div>
                             { `Balance ETH: ${ balance }` }
+                        </div>
+                        <div>
+                            { `Wallet Address: ${ myAddress }` }
                         </div>
                     </h2>
 
