@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import './App.css';
 import contract                from './contracts/NFTCollectible.json';
 import { ethers }              from 'ethers';
 
-const contractAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+const contractAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71";
 const abi             = contract.abi;
+
+
 
 function App() {
 
     const [ currentAccount, setCurrentAccount ] = useState(null);
     const [ paymentInfo, setPaymentInfo ]       = useState({});
+    const [ balance, setBalance ]               = useState('')
     const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
     const [ nonce, from, chainId ]              = transitionData;
 
@@ -33,6 +36,14 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
+
+    useLayoutEffect(async () => {
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        let initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+        setBalance(initialBalance)
+    },[]);
+
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
@@ -76,8 +87,11 @@ function App() {
             const { ethereum } = window;
 
             if (ethereum) {
-                const provider    = new ethers.providers.Web3Provider(ethereum);
-                const signer      = provider.getSigner();
+                const provider = new ethers.providers.Web3Provider(ethereum);
+                const signer   = provider.getSigner();
+                const block    = await provider.getBlockNumber()
+                console.log('block', block);
+
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
 
                 console.log("Initialize payment");
@@ -91,7 +105,13 @@ function App() {
                 const someThing = await signer.getGasPrice();
                 console.log('someThing', someThing);
 
-                console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${ nftTxn.hash }`);
+                let balance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+                console.log('balance', balance);
+                let formatBalance = ethers.utils.formatEther(balance)
+                setBalance(formatBalance)
+                console.log('formatBalance', formatBalance)
+
+                // console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${ nftTxn.hash }`);
 
             } else {
                 console.log("Ethereum object does not exist");
@@ -139,9 +159,11 @@ function App() {
                                 nonce && from && chainId !== undefined ?
                                     <div className={ '' }>
                                         { `Nonce:${ nonce }  From:${ from }  ChainId:${ chainId }` }
+
                                     </div>
                                     : ''
                             }
+                            { `Balance ETH: ${ balance }` }
                         </div>
                     </h2>
 
