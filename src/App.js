@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import './App.css';
 import contract                                 from './contracts/NFTCollectible.json';
-import { ethers }                     from 'ethers';
+import { ethers }                               from 'ethers';
 
 const contractAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71";
 const abi             = contract.abi;
@@ -10,7 +10,7 @@ function App() {
 
     const [ currentAccount, setCurrentAccount ] = useState(null);
     const [ paymentInfo, setPaymentInfo ]       = useState({});
-    const [ balance, setBalance ]               = useState('')
+    const [ balance, setBalance ]               = useState('');
     const [ myAddress, setMyAddress ]           = useState('');
     const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
     const [ nonce, from, chainId ]              = transitionData;
@@ -39,17 +39,18 @@ function App() {
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
             // Crete Provider
-            const { ethereum }  = window;
+            const { ethereum } = window;
             ethereum.request({ method: 'eth_requestAccounts' })
-            const provider      = new ethers.providers.Web3Provider(ethereum);
+            const provider = new ethers.providers.Web3Provider(ethereum);
 
             // Get Current Address Wallet
-            const signer        = provider.getSigner()
+            const signer = provider.getSigner()
             console.log('getSigner');
             const currentWallet = await signer.getAddress();
             console.log('currentWallet');
-            setMyAddress(currentWallet)
-
+            if (currentWallet) {
+                setMyAddress(currentWallet)
+            }
             // Get Balance of Wallet
             const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
             const formatBalance  = ethers.utils.formatEther(initialBalance)
