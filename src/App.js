@@ -38,9 +38,9 @@ function App() {
 
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
-
             // Crete Provider
             const { ethereum }  = window;
+            ethereum.request({ method: 'eth_requestAccounts' })
             const provider      = new ethers.providers.Web3Provider(ethereum);
 
             // Get Current Address Wallet
