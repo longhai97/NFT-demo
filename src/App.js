@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import './App.css';
 import contract                                 from './contracts/NFTCollectible.json';
-import { ethers }                               from 'ethers';
+import { ethers }                     from 'ethers';
 
 const contractAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71";
 const abi             = contract.abi;
