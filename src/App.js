@@ -45,7 +45,9 @@ function App() {
 
             // Get Current Address Wallet
             const signer        = provider.getSigner()
+            console.log('getSigner');
             const currentWallet = await signer.getAddress();
+            console.log('currentWallet');
             setMyAddress(currentWallet)
 
             // Get Balance of Wallet
