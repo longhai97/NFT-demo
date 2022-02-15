@@ -45,12 +45,11 @@ function App() {
 
             // Get Current Address Wallet
             const signer = provider.getSigner()
-            console.log('getSigner');
             const currentWallet = await signer.getAddress();
-            console.log('currentWallet');
             if (currentWallet) {
                 setMyAddress(currentWallet)
             }
+
             // Get Balance of Wallet
             const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
             const formatBalance  = ethers.utils.formatEther(initialBalance)
