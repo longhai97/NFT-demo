@@ -1,19 +1,17 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import './App.css';
-import contract                                 from './contracts/NFTCollectible.json';
-import { ethers }                               from 'ethers';
-
-const contractAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71";
-const abi             = contract.abi;
+import contract from './contracts/NFTCollectible.json';
+import { ethers } from 'ethers';
+const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
+const abi = contract.abi;
 
 function App() {
-
-    const [ currentAccount, setCurrentAccount ] = useState(null);
-    const [ paymentInfo, setPaymentInfo ]       = useState({});
-    const [ balance, setBalance ]               = useState('');
-    const [ myAddress, setMyAddress ]           = useState('');
-    const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
-    const [ nonce, from, chainId ]              = transitionData;
+    const [currentAccount, setCurrentAccount] = useState(null);
+    const [paymentInfo, setPaymentInfo] = useState({});
+    const [balance, setBalance] = useState('');
+    const [myAddress, setMyAddress] = useState('');
+    const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
+    const [nonce, from, chainId] = transitionData;
 
     console.log('paymentInfo', paymentInfo);
 
@@ -40,18 +38,19 @@ function App() {
         const fetchInitialData = async () => {
             // Crete Provider
             const { ethereum } = window;
-            const provider     = new ethers.providers.Web3Provider(ethereum);
+            const provider = new ethers.providers.Web3Provider(ethereum);
 
             // Get Current Address Wallet
             ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res))
 
             // Get Balance of Wallet
             const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
-            const formatBalance  = ethers.utils.formatEther(initialBalance)
+            const formatBalance = ethers.utils.formatEther(initialBalance)
             setBalance(formatBalance)
+            console.log('balance', balance);
         }
         fetchInitialData()
-    }, [ balance ]);
+    }, [balance]);
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
@@ -96,14 +95,14 @@ function App() {
 
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                const signer   = provider.getSigner();
-                const block    = await provider.getBlockNumber()
+                const signer = provider.getSigner();
+                const block = await provider.getBlockNumber()
                 console.log('block', block);
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
 
                 console.log("Initialize payment");
-                let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("100") });
+                let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("0.001") });
 
                 setPaymentInfo(nftTxn)
 
@@ -113,7 +112,7 @@ function App() {
                 const someThing = await signer.getGasPrice();
                 console.log('someThing', someThing);
 
-                let balance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+                let balance = await provider.getBalance('0x805e67770511B4BF80c3adf726Ab4E470838fC58')
                 console.log('balance', balance);
                 let formatBalance = ethers.utils.formatEther(balance)
                 setBalance(formatBalance)
@@ -132,7 +131,7 @@ function App() {
 
     const connectWalletButton = () => {
         return (
-            <button onClick={ connectWalletHandler } className='cta-button connect-wallet-button'>
+            <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
                 Connect Wallet
             </button>
         )
@@ -140,7 +139,7 @@ function App() {
 
     const mintNftButton = () => {
         return (
-            <button onClick={ mintNftHandler } className='main-mint-btn '>
+            <button onClick={mintNftHandler} className='main-mint-btn '>
                 Buy Car
             </button>
         )
@@ -153,50 +152,50 @@ function App() {
     return (
         <div className="App">
 
-            {/* MAIN BANNER */ }
-            <div className="main-card-wrapper" style={ { backgroundImage: `url(${ mainBgImage })` } }>
+            {/* MAIN BANNER */}
+            <div className="main-card-wrapper" style={{ backgroundImage: `url(${mainBgImage})` }}>
                 <div className="main-card__inner-wrapper">
-                    <h1 className="header-txt" style={ { color: '#170426' } }>Vinfast Smart Contract</h1>
+                    <h1 className="header-txt" style={{ color: '#170426' }}>Vinfast Smart Contract</h1>
 
                     <h2>
                         <div>
-                            { myAddress ? mintNftButton() : connectWalletButton() }
+                            {myAddress ? mintNftButton() : connectWalletButton()}
                         </div>
                         <>
                             {
                                 nonce && from && chainId !== undefined ?
-                                    <div className={ '' }>
-                                        { `Nonce:${ nonce }  From:${ from }  ChainId:${ chainId }` }
+                                    <div className={''}>
+                                        {`Nonce:${nonce}  From:${from}  ChainId:${chainId}`}
 
                                     </div>
                                     : ''
                             }
                         </>
                         <div>
-                            { `Balance ETH: ${ balance }` }
+                            {`Balance ETH: ${balance}`}
                         </div>
                         <div>
-                            { `Wallet Address: ${ myAddress }` }
+                            {`Wallet Address: ${myAddress}`}
                         </div>
                     </h2>
 
                 </div>
             </div>
 
-            {/* CAR LIST */ }
+            {/* CAR LIST */}
             <div className="cards-wrapper">
-                { apes.map((ape, index) => (
-                    <div className="cards-item" key={ index }>
+                {apes.map((ape, index) => (
+                    <div className="cards-item" key={index}>
                         <div className="img-wrapper">
-                            <img src={ ape.img } alt={ `ape_${ index }` }/>
+                            <img src={ape.img} alt={`ape_${index}`} />
                         </div>
                         <div className="btn-wrapper">
                             <div>
-                                { myAddress ? mintNftButton() : connectWalletButton() }
+                                {myAddress ? mintNftButton() : connectWalletButton()}
                             </div>
                         </div>
                     </div>
-                )) }
+                ))}
             </div>
         </div>
     )
