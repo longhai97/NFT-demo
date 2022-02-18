@@ -40,15 +40,10 @@ function App() {
         const fetchInitialData = async () => {
             // Crete Provider
             const { ethereum } = window;
-            ethereum.request({ method: 'eth_requestAccounts' })
-            const provider = new ethers.providers.Web3Provider(ethereum);
+            const provider     = new ethers.providers.Web3Provider(ethereum);
 
             // Get Current Address Wallet
-            const signer = provider.getSigner()
-            const currentWallet = await signer.getAddress();
-            if (currentWallet) {
-                setMyAddress(currentWallet)
-            }
+            ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res))
 
             // Get Balance of Wallet
             const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
@@ -56,7 +51,7 @@ function App() {
             setBalance(formatBalance)
         }
         fetchInitialData()
-    }, [ myAddress, balance ]);
+    }, [ balance ]);
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
@@ -165,7 +160,7 @@ function App() {
 
                     <h2>
                         <div>
-                            { currentAccount ? mintNftButton() : connectWalletButton() }
+                            { myAddress ? mintNftButton() : connectWalletButton() }
                         </div>
                         <>
                             {
@@ -197,7 +192,7 @@ function App() {
                         </div>
                         <div className="btn-wrapper">
                             <div>
-                                { currentAccount ? mintNftButton() : connectWalletButton() }
+                                { myAddress ? mintNftButton() : connectWalletButton() }
                             </div>
                         </div>
                     </div>
