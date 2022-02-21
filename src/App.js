@@ -1,4 +1,24 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
+import {
+    Modal,
+    Form,
+    Input,
+    Button,
+    Checkbox,
+    InputNumber
+
+} from 'antd';
+import {
+    UserOutlined,
+    EyeTwoTone,
+    EyeInvisibleOutlined,
+    MailFilled,
+    EditFilled,
+    PhoneFilled,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+} from '@ant-design/icons';
+import 'antd/dist/antd.css';
 import './App.css';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
@@ -10,8 +30,25 @@ function App() {
     const [paymentInfo, setPaymentInfo] = useState({});
     const [balance, setBalance] = useState('');
     const [myAddress, setMyAddress] = useState('');
+    const [visiable, setVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    console.log(34343, isModalVisible);
+    const [form] = Form.useForm();
     const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
     const [nonce, from, chainId] = transitionData;
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
 
     console.log('paymentInfo', paymentInfo);
 
@@ -44,21 +81,17 @@ function App() {
         const fetchInitialData = async () => {
             // Crete Provider
             const { ethereum } = window;
-            if (!ethereum) {
-                alert("Make sure you have Metamask installed!");
-                return;
+            if (ethereum) {
+                const provider = new ethers.providers.Web3Provider(ethereum);
+                ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res))
+
+                // Get Balance of Wallet
+                const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
+                const formatBalance = ethers.utils.formatEther(initialBalance)
+                setBalance(formatBalance)
+                console.log('balance', balance);
             }
-
-            const provider = new ethers.providers.Web3Provider(ethereum);
-
             // Get Current Address Wallet
-            ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res))
-
-            // Get Balance of Wallet
-            const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
-            const formatBalance = ethers.utils.formatEther(initialBalance)
-            setBalance(formatBalance)
-            console.log('balance', balance);
         }
         fetchInitialData()
         const autoAddToken = async () => {
@@ -94,8 +127,10 @@ function App() {
         const { ethereum } = window;
 
         if (!ethereum) {
-            console.log("Make sure you have Metamask installed!");
+            setTimeout(function () { alert("Bạn chưa cài đặt ví Metamask!"); }, 1000);
             return;
+        } else {
+            window.alert("Wallet exists! We're ready to go!")
         }
 
         const accounts = await ethereum.request({ method: 'eth_accounts' });
@@ -107,13 +142,14 @@ function App() {
         } else {
             console.log("No authorized account found");
         }
+
     }
 
     const connectWalletHandler = async () => {
         const { ethereum } = window;
 
         if (!ethereum) {
-            alert("Please install Metamask!");
+            alert("Hãy cài ví Metamask!");
         }
 
         try {
@@ -136,6 +172,7 @@ function App() {
                 console.log('block', block);
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
+                setIsModalVisible(true)
 
                 console.log("Initialize payment");
                 let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("0.001") });
@@ -152,9 +189,7 @@ function App() {
                 console.log('balance', balance);
                 let formatBalance = ethers.utils.formatEther(balance)
                 setBalance(formatBalance)
-                console.log('formatBalance', formatBalance)
-
-                // console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${ nftTxn.hash }`);
+                console.log('formatBalance', formatBalance);
 
             } else {
                 console.log("Ethereum object does not exist");
@@ -172,12 +207,16 @@ function App() {
             </button>
         )
     }
-
     const mintNftButton = () => {
         return (
-            <button onClick={mintNftHandler} className='main-mint-btn '>
-                Buy Car
-            </button>
+            <div>
+                <button className='main-mint-btn '
+                    onClick={() => {
+                        mintNftHandler();
+                    }}>
+                    Buy Car
+                </button>
+            </div>
         )
     }
 
@@ -216,6 +255,7 @@ function App() {
                     </h2>
 
                 </div>
+
             </div>
 
             {/* CAR LIST */}
@@ -233,6 +273,31 @@ function App() {
                     </div>
                 ))}
             </div>
+
+            <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
+                <Form name="nest-messages" onFinish={''} validateMessages={''}>
+                    <Form.Item name={['user', 'name']} label="Name" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name={['user', 'age']} label="Age" rules={[{ type: 'number', min: 0, max: 99 }]}>
+                        <InputNumber />
+                    </Form.Item>
+                    <Form.Item name={['user', 'website']} label="Website">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name={['user', 'introduction']} label="Introduction">
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item wrapperCol={{ offset: 8 }}>
+                        <Button type="primary" htmlType="submit">
+                            Submit
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     )
 }
