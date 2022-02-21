@@ -38,6 +38,11 @@ function App() {
         const fetchInitialData = async () => {
             // Crete Provider
             const { ethereum } = window;
+            if (!ethereum) {
+                alert("Make sure you have Metamask installed!");
+                return;
+            }
+
             const provider = new ethers.providers.Web3Provider(ethereum);
 
             // Get Current Address Wallet
@@ -58,8 +63,6 @@ function App() {
         if (!ethereum) {
             console.log("Make sure you have Metamask installed!");
             return;
-        } else {
-            console.log("Wallet exists! We're ready to go!")
         }
 
         const accounts = await ethereum.request({ method: 'eth_accounts' });
