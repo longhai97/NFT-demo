@@ -4,20 +4,8 @@ import {
     Form,
     Input,
     Button,
-    Checkbox,
     InputNumber
-
 }                                               from 'antd';
-import {
-    UserOutlined,
-    EyeTwoTone,
-    EyeInvisibleOutlined,
-    MailFilled,
-    EditFilled,
-    PhoneFilled,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-}                                               from '@ant-design/icons';
 import 'antd/dist/antd.css';
 import './App.css';
 import contract                                 from './contracts/NFTCollectible.json';
@@ -58,7 +46,6 @@ function App() {
         let vedBalance    = await vedContract.balanceOf(userAddress);
         vedBalance        = ethers.utils.formatUnits(vedBalance, 1);
         setBalanceVED(vedBalance)
-        console.log('vedBalance', vedBalance);
     }
 
     getVEDBalance();
@@ -74,9 +61,6 @@ function App() {
     const handleCancel = () => {
         setIsModalVisible(false);
     };
-
-
-    console.log('paymentInfo', paymentInfo);
 
     // Main Banner Image
     const mainBgImage = "https://wallpapercave.com/wp/wp8806153.jpg";
