@@ -4,7 +4,6 @@ import {
     Form,
     Input,
     Button,
-    Checkbox,
     InputNumber
 
 } from 'antd';
@@ -14,16 +13,48 @@ import axios from 'axios';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
-const abi = contract.abi;
+const abi             = contract.abi;
+const provider        = new ethers.providers.Web3Provider(window.ethereum, "any");
+const ved             = {
+    address: "0xc1f334070eB88B8a4985779D3e8F4B2aeA6f38D2",
+    abi: [
+        "function name() view returns (string)",
+        "function symbol() view returns (string)",
+        "function gimmeSome() external",
+        "function balanceOf(address _owner) public view returns (uint256 balance)",
+        "function transfer(address _to, uint256 _value) public returns (bool success)",
+    ],
+};
 
 function App() {
-    const [currentAccount, setCurrentAccount] = useState(null);
-    const [paymentInfo, setPaymentInfo] = useState({});
-    const [balance, setBalance] = useState('');
-    const [myAddress, setMyAddress] = useState('');
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
-    const [nonce, from, chainId] = transitionData;
+    const [ currentAccount, setCurrentAccount ] = useState(null);
+    const [ paymentInfo, setPaymentInfo ]       = useState({});
+    const [ balanceETH, setBalanceETH ]         = useState('');
+    const [ balanceVED, setBalanceVED ]         = useState('');
+    const [ myAddress, setMyAddress ]           = useState('');
+    const [ visiable, setVisible ]              = useState(false);
+    const [ isModalVisible, setIsModalVisible ] = useState(false);
+    console.log(34343, isModalVisible);
+    const [ form ]                 = Form.useForm();
+    const transitionData           = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
+    const [ nonce, from, chainId ] = transitionData;
+
+    async function getVEDBalance() {
+        await provider.send("eth_requestAccounts", []);
+        const signer      = provider.getSigner();
+        let userAddress   = await signer.getAddress();
+        const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
+        let vedBalance    = await vedContract.balanceOf(userAddress);
+        vedBalance        = ethers.utils.formatUnits(vedBalance, 1);
+        setBalanceVED(vedBalance)
+    }
+
+    getVEDBalance();
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+
     const handleOk = () => {
         setIsModalVisible(false);
     };
@@ -31,9 +62,6 @@ function App() {
     const handleCancel = () => {
         setIsModalVisible(false);
     };
-
-
-    console.log('paymentInfo', paymentInfo);
 
     // Main Banner Image
     const mainBgImage = "https://wallpapercave.com/wp/wp8806153.jpg";
@@ -57,7 +85,7 @@ function App() {
     const tokenAddress = '0xd00981105e61274c8a5cd5a88fe7e037d935b513';
     const tokenSymbol = 'TUT';
     const tokenDecimals = 18;
-    const tokenImage = 'http://placekitten.com/200/300';
+    const tokenImage    = 'http://placekitten.com/200/300';
 
     useEffect(() => {
         axios({
@@ -101,10 +129,10 @@ function App() {
                 ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res))
 
                 // Get Balance of Wallet
-                const initialBalance = await provider.getBalance('0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097')
-                const formatBalance = ethers.utils.formatEther(initialBalance)
-                setBalance(formatBalance)
-                console.log('balance', balance);
+                const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
+                const formatBalance  = ethers.utils.formatEther(initialBalance)
+                setBalanceETH(formatBalance)
+                console.log('balance', balanceETH);
             }
             // Get Current Address Wallet
         }
@@ -136,13 +164,15 @@ function App() {
             }
         }
         autoAddToken()
-    }, [balance]);
+    }, [ balanceETH ]);
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
 
         if (!ethereum) {
-            setTimeout(function () { alert("Bạn chưa cài đặt ví Metamask!"); }, 1000);
+            setTimeout(function () {
+                alert("Bạn chưa cài đặt ví Metamask!");
+            }, 1000);
             return;
         } else {
             window.alert("Wallet exists! We're ready to go!")
@@ -162,7 +192,6 @@ function App() {
 
     const connectWalletHandler = async () => {
         const { ethereum } = window;
-
         if (!ethereum) {
             alert("Hãy cài ví Metamask!");
         }
@@ -182,8 +211,8 @@ function App() {
 
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                const signer = provider.getSigner();
-                const block = await provider.getBlockNumber()
+                const signer   = provider.getSigner();
+                const block    = await provider.getBlockNumber()
                 console.log('block', block);
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
@@ -203,7 +232,7 @@ function App() {
                 let balance = await provider.getBalance('0x805e67770511B4BF80c3adf726Ab4E470838fC58')
                 console.log('balance', balance);
                 let formatBalance = ethers.utils.formatEther(balance)
-                setBalance(formatBalance)
+                setBalanceETH(formatBalance)
                 console.log('formatBalance', formatBalance);
 
             } else {
@@ -217,18 +246,18 @@ function App() {
 
     const connectWalletButton = () => {
         return (
-            <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
+            <button onClick={ connectWalletHandler } className='cta-button connect-wallet-button'>
                 Connect Wallet
             </button>
         )
     }
-    const mintNftButton = () => {
+    const mintNftButton       = () => {
         return (
             <div>
                 <button className='main-mint-btn '
-                    onClick={() => {
-                        mintNftHandler();
-                    }}>
+                        onClick={ () => {
+                            mintNftHandler();
+                        } }>
                     Buy Car
                 </button>
             </div>
@@ -242,30 +271,33 @@ function App() {
     return (
         <div className="App">
 
-            {/* MAIN BANNER */}
-            <div className="main-card-wrapper" style={{ backgroundImage: `url(${mainBgImage})` }}>
+            {/* MAIN BANNER */ }
+            <div className="main-card-wrapper" style={ { backgroundImage: `url(${ mainBgImage })` } }>
                 <div className="main-card__inner-wrapper">
-                    <h1 className="header-txt" style={{ color: '#170426' }}>Vinfast Smart Contract</h1>
+                    <h1 className="header-txt" style={ { color: '#170426' } }>Vinfast Smart Contract</h1>
 
                     <h2>
                         <div>
-                            {myAddress ? mintNftButton() : connectWalletButton()}
+                            { myAddress ? mintNftButton() : connectWalletButton() }
                         </div>
                         <>
                             {
                                 nonce && from && chainId !== undefined ?
-                                    <div className={''}>
-                                        {`Nonce:${nonce}  From:${from}  ChainId:${chainId}`}
+                                    <div className={ '' }>
+                                        { `Nonce:${ nonce }  From:${ from }  ChainId:${ chainId }` }
 
                                     </div>
                                     : ''
                             }
                         </>
                         <div>
-                            {`Balance ETH: ${balance}`}
+                            { `Balance ETH: ${ balanceETH }` }
                         </div>
                         <div>
-                            {`Wallet Address: ${myAddress}`}
+                            { `Balance VED: ${ balanceVED }` }
+                        </div>
+                        <div>
+                            { `Wallet Address: ${ myAddress }` }
                         </div>
                     </h2>
 
@@ -273,20 +305,20 @@ function App() {
 
             </div>
 
-            {/* CAR LIST */}
+            {/* CAR LIST */ }
             <div className="cards-wrapper">
-                {apes.map((ape, index) => (
-                    <div className="cards-item" key={index}>
+                { apes.map((ape, index) => (
+                    <div className="cards-item" key={ index }>
                         <div className="img-wrapper">
-                            <img src={ape.img} alt={`ape_${index}`} />
+                            <img src={ ape.img } alt={ `ape_${ index }` }/>
                         </div>
                         <div className="btn-wrapper">
                             <div>
-                                {myAddress ? mintNftButton() : connectWalletButton()}
+                                { myAddress ? mintNftButton() : connectWalletButton() }
                             </div>
                         </div>
                     </div>
-                ))}
+                )) }
             </div>
 
             <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
@@ -300,7 +332,7 @@ function App() {
                     <Form.Item name={['user', 'address']} label="Address" rules={[{ required: true }]}>
                         <Input.TextArea />
                     </Form.Item>
-                    <Form.Item wrapperCol={{ offset: 8 }}>
+                    <Form.Item wrapperCol={ { offset: 8 } }>
                         <Button type="primary" htmlType="submit">
                             Gửi
                         </Button>
