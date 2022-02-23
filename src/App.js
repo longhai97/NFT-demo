@@ -8,18 +8,9 @@ import {
     InputNumber
 
 } from 'antd';
-import {
-    UserOutlined,
-    EyeTwoTone,
-    EyeInvisibleOutlined,
-    MailFilled,
-    EditFilled,
-    PhoneFilled,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-} from '@ant-design/icons';
 import 'antd/dist/antd.css';
 import './App.css';
+import axios from 'axios';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
@@ -30,17 +21,9 @@ function App() {
     const [paymentInfo, setPaymentInfo] = useState({});
     const [balance, setBalance] = useState('');
     const [myAddress, setMyAddress] = useState('');
-    const [visiable, setVisible] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    console.log(34343, isModalVisible);
-    const [form] = Form.useForm();
     const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
     const [nonce, from, chainId] = transitionData;
-
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-
     const handleOk = () => {
         setIsModalVisible(false);
     };
@@ -71,12 +54,44 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-
     const tokenAddress = '0xd00981105e61274c8a5cd5a88fe7e037d935b513';
     const tokenSymbol = 'TUT';
     const tokenDecimals = 18;
     const tokenImage = 'http://placekitten.com/200/300';
 
+    useEffect(() => {
+        axios({
+            method: "get",
+            url: "http://192.168.66.125:9999/api/v1.0/user",
+        })
+            .then(response => {
+                console.log(response);
+            })
+            .catch(Error => {
+                console.log(Error)
+            });
+    }, [])
+
+    const handleSubmit = async (value) => {
+        console.log(4444, value.user);
+        // store the states in the form data
+        try {
+            // make axios post request
+            const response = await axios({
+                method: "post",
+                url: "http://192.168.66.125:9999/api/v1.0/user",
+                data: {
+                    full_name: value.user.full_name,
+                    phone: value.user.phone,
+                    address: value.user.address,
+                    wallet: myAddress.toString()
+                },
+                headers: { "Content-Type": "application/json" },
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    }
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
             // Crete Provider
@@ -275,25 +290,19 @@ function App() {
             </div>
 
             <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
-                <Form name="nest-messages" onFinish={''} validateMessages={''}>
-                    <Form.Item name={['user', 'name']} label="Name" rules={[{ required: true }]}>
+                <Form name="nest-messages" onFinish={handleSubmit} >
+                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]}>
+                    <Form.Item name={['user', 'phone']} label="Phone" rules={[{ required: true }]} >
                         <Input />
                     </Form.Item>
-                    <Form.Item name={['user', 'age']} label="Age" rules={[{ type: 'number', min: 0, max: 99 }]}>
-                        <InputNumber />
-                    </Form.Item>
-                    <Form.Item name={['user', 'website']} label="Website">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name={['user', 'introduction']} label="Introduction">
+                    <Form.Item name={['user', 'address']} label="Address" rules={[{ required: true }]}>
                         <Input.TextArea />
                     </Form.Item>
                     <Form.Item wrapperCol={{ offset: 8 }}>
                         <Button type="primary" htmlType="submit">
-                            Submit
+                            Gửi
                         </Button>
                     </Form.Item>
                 </Form>
