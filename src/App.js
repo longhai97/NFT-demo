@@ -81,7 +81,6 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-
     const tokenAddress  = '0xd00981105e61274c8a5cd5a88fe7e037d935b513';
     const tokenSymbol   = 'TUT';
     const tokenDecimals = 18;
@@ -159,7 +158,6 @@ function App() {
 
     const connectWalletHandler = async () => {
         const { ethereum } = window;
-
         if (!ethereum) {
             alert("Hãy cài ví Metamask!");
         }
