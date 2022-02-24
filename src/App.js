@@ -370,12 +370,6 @@ function App() {
                     </div>
                 ))}
             </div>
-<<<<<<< HEAD
-            <Modal title="Nhập thông tin người dùng" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
-                <Form name="nest-messages" onFinish={handleSubmit} >
-                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
-                        <Input />
-=======
 
             <Modal title="User Information" visible={ isModalVisible } onOk={ handleOk } onCancel={ handleCancel }>
                 <Form name="nest-messages"
@@ -386,7 +380,6 @@ function App() {
                       onFinish={ handleSubmit }>
                     <Form.Item name={ [ 'user', 'full_name' ] } label="Full name" rules={ [ { required: true } ] }>
                         <Input/>
->>>>>>> 80607f9c3f93fe60e86706502b3d7cb2fa79add8
                     </Form.Item>
                     <Form.Item name={ [ 'user', 'phone' ] } label="Phone" rules={ [ { required: true } ] }>
                         <Input/>
