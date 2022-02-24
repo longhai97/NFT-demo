@@ -14,9 +14,9 @@ import web3 from 'web3';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
-const abi             = contract.abi;
-const provider        = new ethers.providers.Web3Provider(window.ethereum, "any");
-const ved             = {
+const abi = contract.abi;
+const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+const ved = {
     address: "0xc1f334070eB88B8a4985779D3e8F4B2aeA6f38D2",
     abi: [
         "function name() view returns (string)",
@@ -43,11 +43,11 @@ function App() {
 
     async function getVEDBalance() {
         await provider.send("eth_requestAccounts", []);
-        const signer      = provider.getSigner();
-        let userAddress   = await signer.getAddress();
+        const signer = provider.getSigner();
+        let userAddress = await signer.getAddress();
         const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
-        let vedBalance    = await vedContract.balanceOf(userAddress);
-        vedBalance        = ethers.utils.formatUnits(vedBalance, 1);
+        let vedBalance = await vedContract.balanceOf(userAddress);
+        vedBalance = ethers.utils.formatUnits(vedBalance, 1);
         setBalanceVED(vedBalance)
     }
 
@@ -184,7 +184,7 @@ function App() {
 
                 // Get Balance of Wallet
                 const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
-                const formatBalance  = ethers.utils.formatEther(initialBalance)
+                const formatBalance = ethers.utils.formatEther(initialBalance)
                 setBalanceETH(formatBalance)
                 console.log('balance', balanceETH);
             }
@@ -242,8 +242,8 @@ function App() {
 
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                const signer   = provider.getSigner();
-                const block    = await provider.getBlockNumber()
+                const signer = provider.getSigner();
+                const block = await provider.getBlockNumber()
                 console.log('block', block);
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
@@ -280,13 +280,29 @@ function App() {
         }
     }
 
-    const buyNftToken = () => {
-        console.log(123);
+    const buyNftToken = async () => {
+        try {
+            const { ethereum } = window;
+            if (ethereum) {
+                const provider = ethers.providers.getDefaultProvider('https://public-node.testnet.rsk.co');
+                const address = '0x10C100988038943327D485e1D7e5E1F83EBDD4C0';
+                const abi = [{ "constant": true, "inputs": [], "name": "name", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "getValue", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_name", "type": "string" }], "name": "setValue", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }];
+                const signer = new ethers.VoidSigner(address, provider)
+                const contract = new ethers.Contract(address, abi, signer);
+                console.log(6666, contract);
+                let sendPromise = await contract.getValue();
+
+                console.log(33331222, sendPromise);
+            }
+
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     const connectWalletButton = () => {
         return (
-            <button onClick={ connectWalletHandler } className='cta-button connect-wallet-button'>
+            <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
                 Connect Wallet
             </button>
         )
@@ -371,23 +387,23 @@ function App() {
                 ))}
             </div>
 
-            <Modal title="User Information" visible={ isModalVisible } onOk={ handleOk } onCancel={ handleCancel }>
+            <Modal title="User Information" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <Form name="nest-messages"
-                      labelCol={ {
-                          flex: '100px',
-                      } }
-                      labelAlign="left"
-                      onFinish={ handleSubmit }>
-                    <Form.Item name={ [ 'user', 'full_name' ] } label="Full name" rules={ [ { required: true } ] }>
-                        <Input/>
+                    labelCol={{
+                        flex: '100px',
+                    }}
+                    labelAlign="left"
+                    onFinish={handleSubmit}>
+                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
+                        <Input />
                     </Form.Item>
-                    <Form.Item name={ [ 'user', 'phone' ] } label="Phone" rules={ [ { required: true } ] }>
-                        <Input/>
+                    <Form.Item name={['user', 'phone']} label="Phone" rules={[{ required: true }]}>
+                        <Input />
                     </Form.Item>
-                    <Form.Item name={ [ 'user', 'address' ] } label="Address" rules={ [ { required: true } ] }>
-                        <Input.TextArea/>
+                    <Form.Item name={['user', 'address']} label="Address" rules={[{ required: true }]}>
+                        <Input.TextArea />
                     </Form.Item>
-                    <Form.Item wrapperCol={ { offset: 8 } }>
+                    <Form.Item wrapperCol={{ offset: 8, marginRight: '20px' }}>
                         <Button type="primary" htmlType="submit" block>
                             Gửi
                         </Button>
