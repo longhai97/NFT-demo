@@ -10,6 +10,7 @@ import {
 import 'antd/dist/antd.css';
 import './App.css';
 import axios from 'axios';
+import web3 from 'web3';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
@@ -32,14 +33,13 @@ function App() {
     const [balanceETH, setBalanceETH] = useState('');
     const [balanceVED, setBalanceVED] = useState('');
     const [myAddress, setMyAddress] = useState('');
-    console.log(7777, myAddress);
     const [customerData, setCustomerData] = useState({});
-    console.log(555, customerData);
+    const [token, setToken] = useState({})
     const [visiable, setVisible] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
-    const [nonce, from, chainId] = transitionData;
+
 
     async function getVEDBalance() {
         await provider.send("eth_requestAccounts", []);
@@ -84,39 +84,38 @@ function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-    const tokenAddress = '0xd00981105e61274c8a5cd5a88fe7e037d935b513';
-    const tokenSymbol = 'TUT';
-    const tokenDecimals = 18;
-    const tokenImage = 'http://placekitten.com/200/300';
+
+
+    useEffect(() => {
+        const getUser = async () => {
+            await axios({
+                method: "get",
+                url: `http://192.168.66.125:9999/api/v1.0/user/${myAddress}`,
+            })
+                .then(response => {
+                    setCustomerData(response.data.data)
+                })
+                .catch(Error => {
+                    console.log(Error)
+                });
+        }
+        getUser()
+    }, [myAddress])
 
     useEffect(() => {
         axios({
             method: "get",
-            url: "http://192.168.66.125:9999/api/v1.0/user",
+            url: 'http://192.168.66.125:9999/api/v1.0/contract/erc20',
         })
             .then(response => {
-                console.log(response);
+                setToken(response.data.data)
             })
             .catch(Error => {
                 console.log(Error)
             });
     }, [])
 
-    useEffect(() => {
-        axios({
-            method: "get",
-            url: `http://192.168.66.125:9999/api/v1.0/user/${myAddress}`,
-        })
-            .then(response => {
-                console.log(response);
-                setCustomerData(response.data.data)
-            })
-            .catch(Error => {
-                console.log(Error)
-            });
-    }, [])
     const handleSubmit = async (value) => {
-        console.log(4444, value.user);
         // store the states in the form data
         try {
             // make axios post request
@@ -139,6 +138,43 @@ function App() {
             console.log(error)
         }
     }
+
+    const tokenAddress = token.address;
+    const tokenSymbol = token.symbol;
+    const tokenDecimals = token.decimals;
+
+    useEffect(() => {
+        if (balanceVED === '0.0') {
+            const autoAddToken = async () => {
+                const { ethereum } = window;
+                try {
+                    // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+                    const wasAdded = await ethereum.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC20', // Initially only supports ERC20, but eventually more!
+                            options: {
+                                address: tokenAddress, // The address that the token is at.
+                                symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+                                decimals: tokenDecimals, // The number of decimals in the token
+                            },
+                        },
+                    });
+
+                    if (wasAdded) {
+                        console.log('Thanks for your interest!');
+                    } else {
+                        console.log('Your loss!');
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+            autoAddToken()
+        }
+    }, [balanceVED])
+
+
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
             // Crete Provider
@@ -156,34 +192,10 @@ function App() {
             // Get Current Address Wallet
         }
         fetchInitialData()
-        const autoAddToken = async () => {
-            const { ethereum } = window;
-            try {
-                // wasAdded is a boolean. Like any RPC method, an error may be thrown.
-                const wasAdded = await ethereum.request({
-                    method: 'wallet_watchAsset',
-                    params: {
-                        type: 'ERC20', // Initially only supports ERC20, but eventually more!
-                        options: {
-                            address: tokenAddress, // The address that the token is at.
-                            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-                            decimals: tokenDecimals, // The number of decimals in the token
-                            image: tokenImage, // A string url of the token logo
-                        },
-                    },
-                });
 
-                if (wasAdded) {
-                    console.log('Thanks for your interest!');
-                } else {
-                    console.log('Your loss!');
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        autoAddToken()
     }, [balanceETH]);
+
+
 
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
@@ -193,9 +205,10 @@ function App() {
                 alert("Bạn chưa cài đặt ví Metamask!");
             }, 1000);
             return;
-        } else {
-            window.alert("Wallet exists! We're ready to go!")
         }
+        // } else {
+        //     window.alert("Wallet exists! We're ready to go!")
+        // }
 
         const accounts = await ethereum.request({ method: 'eth_accounts' });
 
@@ -235,14 +248,17 @@ function App() {
                 console.log('block', block);
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
-                setIsModalVisible(true)
-
-                console.log("Initialize payment");
+                if (!customerData) {
+                    setIsModalVisible(true)
+                }
                 let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("0.001") });
 
                 setPaymentInfo(nftTxn)
 
-                console.log("Mining... please wait");
+                setTimeout(function () {
+                    alert("Đang thanh toán, xin vui lòng đợi ");
+                }, 1000);
+
                 await nftTxn.wait();
 
                 const someThing = await signer.getGasPrice();
@@ -252,7 +268,9 @@ function App() {
                 console.log('balance', balance);
                 let formatBalance = ethers.utils.formatEther(balance)
                 setBalanceETH(formatBalance)
-                console.log('formatBalance', formatBalance);
+                setTimeout(function () {
+                    alert("Giao dịch thành công");
+                }, 1000);
 
             } else {
                 console.log("Ethereum object does not exist");
@@ -261,6 +279,10 @@ function App() {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    const buyNftToken = () => {
+        console.log(123);
     }
 
     const connectWalletButton = () => {
@@ -277,7 +299,20 @@ function App() {
                     onClick={() => {
                         mintNftHandler();
                     }}>
-                    Buy Car
+                    Mua xe
+                </button>
+            </div>
+        )
+    }
+
+    const buyToken = () => {
+        return (
+            <div>
+                <button className='main-mint-btn '
+                    onClick={() => {
+                        buyNftToken();
+                    }}>
+                    Mua token
                 </button>
             </div>
         )
@@ -299,28 +334,21 @@ function App() {
                         <div>
                             {myAddress ? mintNftButton() : connectWalletButton()}
                         </div>
-                        <>
-                            {
-                                nonce && from && chainId !== undefined ?
-                                    <div className={''}>
-                                        {`Nonce:${nonce}  From:${from}  ChainId:${chainId}`}
-
-                                    </div>
-                                    : ''
-                            }
-                        </>
+                        <div>
+                            {buyToken()}
+                        </div>
                         <div>
                             {`Balance ETH: ${balanceETH}`}
                         </div>
                         <div>
                             {`Balance VED: ${balanceVED}`}
                         </div>
-                        {/* <div>
+                        {customerData && customerData.full_name && <div>
                             {`Tên khách hàng: ${customerData.full_name}`}
-                        </div>
-                        <div>
+                        </div>}
+                        {customerData && customerData.phone && <div>
                             {`Số điện thoai : ${customerData.phone}`}
-                        </div> */}
+                        </div>}
                     </h2>
 
                 </div>
@@ -338,12 +366,12 @@ function App() {
                             <div>
                                 {myAddress ? mintNftButton() : connectWalletButton()}
                             </div>
+
                         </div>
                     </div>
                 ))}
             </div>
-
-            <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
+            <Modal title="Nhập thông tin người dùng" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} >
                 <Form name="nest-messages" onFinish={handleSubmit} >
                     <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
                         <Input />
