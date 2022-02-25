@@ -205,10 +205,6 @@ function App() {
             }, 1000);
             return;
         }
-        // } else {
-        //     window.alert("Wallet exists! We're ready to go!")
-        // }
-
         const accounts = await ethereum.request({ method: 'eth_accounts' });
 
         if (accounts.length !== 0) {
