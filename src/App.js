@@ -32,12 +32,6 @@ export default function App() {
     const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
     const [ current, setCurrent ]               = useState('mail');
 
-    const handleClick = e => {
-        console.log('click ', e);
-        setCurrent({ current: e.key });
-    };
-
-
     async function getVEDBalance() {
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -327,7 +321,6 @@ export default function App() {
             console.log(err);
         }
     }
-    console.log('transistion', transistion)
 
     const buyNftToken = async () => {
         try {
@@ -850,7 +843,7 @@ export default function App() {
     useEffect(() => {
         checkWalletIsConnected();
     }, [])
-    console.log('myAddress',myAddress[0]);
+
     return (
         <div className="App">
             <Navbar address={myAddress[0]} fullName={customerData?.full_name} phone={customerData?.phone}/>
