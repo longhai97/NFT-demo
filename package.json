@@ -41,6 +41,7 @@
     ]
   },
   "devDependencies": {
+    "@ant-design/icons": "^4.7.0",
     "hardhat": "^2.8.3"
   }
 }

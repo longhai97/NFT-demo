@@ -4,12 +4,13 @@ import {
     Form,
     Input,
     Button,
-} from 'antd';
+}                 from 'antd';
 import 'antd/dist/antd.css';
 import './App.css';
-import axios from 'axios';
-import contract from './contracts/NFTCollectible.json';
+import axios      from 'axios';
+import contract   from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
+import Navbar     from "./Navbar";
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
 const abi = contract.abi;
 const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -191,8 +192,6 @@ function App() {
 
     }, [balanceETH]);
 
-
-
     const checkWalletIsConnected = async () => {
         const { ethereum } = window;
 
@@ -334,6 +333,8 @@ function App() {
     return (
         <div className="App">
 
+            <Navbar/>
+
             {/* MAIN BANNER */}
             <div className="main-card-wrapper" style={{ backgroundImage: `url(${mainBgImage})` }}>
                 <div className="main-card__inner-wrapper">
@@ -361,7 +362,6 @@ function App() {
                     </h2>
 
                 </div>
-
             </div>
 
             {/* CAR LIST */}
