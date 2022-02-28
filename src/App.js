@@ -35,7 +35,7 @@ function App() {
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             const ved = {
-                address: "0x60eb439aCFec76d98E7D9eD6440b0682090a4aA4",
+                address: "0xB2315C83AF8A5b6Fc51ae3F6ad687EE5c77E93A7",
                 abi: [
                     "function name() view returns (string)",
                     "function symbol() view returns (string)",
@@ -176,6 +176,39 @@ function App() {
         }
     }, [balanceVED])
 
+    useEffect(() => {
+        async function addPolygonTestnetNetwork() {
+            const { ethereum } = window;
+            try {
+                await ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1f' }],
+                });
+            } catch (error) {
+                if (error.code === 4902) {
+                    try {
+                        await ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x1f',
+                                chainName: "RSK Testnet",
+                                nativeCurrency: {
+                                    name: "	tRBTC",
+                                    symbol: ":tRBTC",
+                                },
+                                rpcUrls: ["https://public-node.testnet.rsk.co"],
+                                blockExplorerUrls: ["https://explorer.testnet.rsk.co"],
+                            }],
+                        });
+                        console.log('hihihihihi');
+                    } catch (addError) {
+                        console.log('Did not add network');
+                    }
+                }
+            }
+        }
+        addPolygonTestnetNetwork()
+    })
 
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
