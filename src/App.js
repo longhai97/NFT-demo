@@ -175,7 +175,41 @@ export default function App() {
             }
             autoAddToken()
         }
-    }, [ balanceVED ])
+    }, [balanceVED])
+
+    useEffect(() => {
+        async function addPolygonTestnetNetwork() {
+            const { ethereum } = window;
+            try {
+                await ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1f' }],
+                });
+            } catch (error) {
+                if (error.code === 4902) {
+                    try {
+                        await ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x1f',
+                                chainName: "RSK Testnet",
+                                nativeCurrency: {
+                                    name: "	tRBTC",
+                                    symbol: ":tRBTC",
+                                },
+                                rpcUrls: ["https://public-node.testnet.rsk.co"],
+                                blockExplorerUrls: ["https://explorer.testnet.rsk.co"],
+                            }],
+                        });
+                        console.log('hihihihihi');
+                    } catch (addError) {
+                        console.log('Did not add network');
+                    }
+                }
+            }
+        }
+        addPolygonTestnetNetwork()
+    })
 
     useLayoutEffect(() => {
         const fetchInitialData = async () => {
