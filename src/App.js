@@ -4,13 +4,10 @@ import {
     Form,
     Input,
     Button,
-    InputNumber
-
 } from 'antd';
 import 'antd/dist/antd.css';
 import './App.css';
 import axios from 'axios';
-import web3 from 'web3';
 import contract from './contracts/NFTCollectible.json';
 import { ethers } from 'ethers';
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
@@ -817,6 +814,7 @@ function App() {
             </button>
         )
     }
+
     const mintNftButton = () => {
         return (
             <div>
