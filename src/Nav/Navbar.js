@@ -63,10 +63,10 @@ const Navbar = ({ address }) => {
         <div>
             <Modal visible={ isModalVisible } onOk={ handleOk } onCancel={ handleCancel }>
                 <div>
-                    { `Tên khách hàng: ${ customerData.full_name }` }
+                    { `Tên khách hàng: ${ customerData?.full_name }` }
                 </div>
                 <div>
-                    { `Số điện thoai : ${ customerData.phone }` }
+                    { `Số điện thoai : ${ customerData?.phone }` }
                 </div>
             </Modal>
 
