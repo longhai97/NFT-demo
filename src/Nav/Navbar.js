@@ -59,7 +59,6 @@ const Navbar = ({ address }) => {
     };
     return (
         <div>
-
             <Modal visible={ isModalVisible } onOk={ handleOk } onCancel={ handleCancel }>
                 <div>
                     { `Tên khách hàng: ${ customerData.full_name }` }
@@ -68,8 +67,8 @@ const Navbar = ({ address }) => {
                     { `Số điện thoai : ${ customerData.phone }` }
                 </div>
             </Modal>
-            <Modal visible={ isModalTransitionsVisible } onOk={ handleOkTransition }
-                   onCancel={ handleCancelTransition }>
+
+            <Modal visible={ isModalTransitionsVisible } onOk={ handleOkTransition } onCancel={ handleCancelTransition }>
                 <div>
                     { `Địa chỉ ví: ${ transitions.wallet }` }
                 </div>
@@ -86,6 +85,7 @@ const Navbar = ({ address }) => {
                     { `Status : ${ transitions.status }` }
                 </div>
             </Modal>
+
             <Menu mode="horizontal">
                 <Menu.Item onClick={ handleGetProfile } key="profile" icon={ <Avatar icon={ <UserOutlined/> }/> }>
                     User's Profile
