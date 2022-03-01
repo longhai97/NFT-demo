@@ -14,6 +14,7 @@ import Navbar                                   from "./Nav/Navbar";
 
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
 const abi             = contract.abi;
+const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
 
 export default function App() {
@@ -108,7 +109,7 @@ export default function App() {
     useEffect(() => {
         axios({
             method: "get",
-            url: 'http://192.168.66.125:9999/api/v1.0/contract/erc20',
+            url: `${baseUrl}/api/v1.0/contract/erc20`,
         })
             .then(response => {
                 setToken(response.data.data)
@@ -124,7 +125,7 @@ export default function App() {
             // make axios post request
             const response = await axios({
                 method: "post",
-                url: "http://192.168.66.125:9999/api/v1.0/user",
+                url: `${baseUrl}/api/v1.0/user`,
                 data: {
                     full_name: value.user.full_name,
                     phone: value.user.phone,
@@ -254,7 +255,7 @@ export default function App() {
             // make axios post request
             const response = await axios({
                 method: "post",
-                url: "http://192.168.66.125:9999/api/v1.0/transaction",
+                url: `${baseUrl}/api/v1.0/transaction`,
                 data: {
                     transaction_id: transistion.hash,
                     address_from: transistion.from,
