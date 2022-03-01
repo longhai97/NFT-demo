@@ -25,7 +25,7 @@ const Navbar = ({ address }) => {
     const getTransitions = async () => {
         await axios({
             method: "get",
-            url: `http://192.168.66.125:9999/api/v1.0/transaction?wallet=0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`,
+            url: `http://192.168.66.125:9999/api/v1.0/transaction?wallet=${address}`,
         })
             .then(response => {
                 console.log('TRANSITION', response.data.data[0]);
