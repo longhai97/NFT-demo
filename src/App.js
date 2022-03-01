@@ -89,22 +89,22 @@ export default function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-    // useEffect(() => {
-    //     const getUser = async () => {
-    //         await axios({
-    //             method: "get",
-    //             url: `http://192.168.66.125:9999/api/v1.0/user/${myAddress}`,
-    //         })
-    //             .then( response => {
-    //                 setCustomerData(response.data.data)
-    //                 console.log('customerData',customerData)
-    //             })
-    //             .catch(Error => {
-    //                 console.log(Error)
-    //             });
-    //     }
-    //     getUser()
-    // }, [])
+    useEffect(() => {
+        const getUser = async () => {
+            await axios({
+                method: "get",
+                url: `${baseUrl}/api/v1.0/user/${myAddress}`,
+            })
+                .then( response => {
+                    setCustomerData(response.data.data)
+                    console.log('customerData',customerData)
+                })
+                .catch(Error => {
+                    console.log(Error)
+                });
+        }
+        getUser()
+    }, [])
 
     useEffect(() => {
         axios({
@@ -324,7 +324,6 @@ export default function App() {
 
                 console.log('block', block);
                 const blockInfo = await provider.getBlock(block)
-
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
                 if (!customerData) {
