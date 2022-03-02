@@ -4,59 +4,39 @@ import {
     Form,
     Input,
     Button, Menu, Avatar,
-}                                               from 'antd';
+} from 'antd';
 import 'antd/dist/antd.css';
 import './App.css';
-import axios                                    from 'axios';
-import contract                                 from './contracts/NFTCollectible.json';
-import { ethers }                               from 'ethers';
-import Navbar                                   from "./Nav/Navbar";
+import axios from 'axios';
+import contract from './contracts/NFTCollectible.json';
+import { ethers } from 'ethers';
+import Navbar from "./Nav/Navbar";
+import history from "history";
 
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
-const abi             = contract.abi;
+const abi = contract.abi;
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
 
 export default function App() {
-    const [ currentAccount, setCurrentAccount ] = useState(null);
-    const [ transistion, setTransistion ]       = useState({});
-    const [ block, setBlock ]                   = useState('');
-    const [ paymentInfo, setPaymentInfo ]       = useState('');
-    const [ balanceETH, setBalanceETH ]         = useState('');
-    const [ balanceVED, setBalanceVED ]         = useState('');
-    const [ myAddress, setMyAddress ]           = useState('');
-    const [ customerData, setCustomerData ]     = useState({});
-    const [ token, setToken ]                   = useState({})
-    const [ visiable, setVisible ]              = useState(false);
-    const [ isModalVisible, setIsModalVisible ] = useState(false);
-    const [ form ]                              = Form.useForm();
-    const transitionData                        = [ paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId ]
-    const [ current, setCurrent ]               = useState('mail');
+    const [currentAccount, setCurrentAccount] = useState(null);
+    const [transistion, setTransistion] = useState({});
+    const [block, setBlock] = useState('');
+    const [paymentInfo, setPaymentInfo] = useState('');
+    const [balanceETH, setBalanceETH] = useState('');
+    const [balanceVED, setBalanceVED] = useState('');
+    console.log('balanceVED', balanceVED);
+    const [myAddress, setMyAddress] = useState('');
+    const [customerData, setCustomerData] = useState({});
+    const [token, setToken] = useState({})
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [form] = Form.useForm();
+    const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
+    const [current, setCurrent] = useState('mail');
 
-    async function getVEDBalance() {
-        if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            const ved      = {
-                address: "0x60eb439aCFec76d98E7D9eD6440b0682090a4aA4",
-                abi: [
-                    "function name() view returns (string)",
-                    "function symbol() view returns (string)",
-                    "function gimmeSome() external",
-                    "function balanceOf(address _owner) public view returns (uint256 balance)",
-                    "function transfer(address _to, uint256 _value) public returns (bool success)",
-                ],
-            };
-            await provider.send("eth_requestAccounts", []);
-            const signer      = provider.getSigner();
-            let userAddress   = await signer.getAddress();
-            const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
-            let vedBalance    = await vedContract.balanceOf(userAddress);
-            vedBalance        = ethers.utils.formatUnits(vedBalance, 1);
-            setBalanceVED(vedBalance)
-        }
-    }
 
-    getVEDBalance();
+
+    // getVEDBalance();
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -89,30 +69,68 @@ export default function App() {
         { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
     ]
 
-    // useEffect(() => {
-    //     const getUser = async () => {
-    //         await axios({
-    //             method: "get",
-    //             url: `http://192.168.66.125:9999/api/v1.0/user/${myAddress}`,
-    //         })
-    //             .then( response => {
-    //                 setCustomerData(response.data.data)
-    //                 console.log('customerData',customerData)
-    //             })
-    //             .catch(Error => {
-    //                 console.log(Error)
-    //             });
-    //     }
-    //     getUser()
-    // }, [])
-
-    useEffect(() => {
+    useLayoutEffect(() => {
         axios({
             method: "get",
             url: `${baseUrl}/api/v1.0/contract/erc20`,
         })
             .then(response => {
+                console.log('response', response);
                 setToken(response.data.data)
+                async function getVEDBalance() {
+                    if (window.ethereum) {
+                        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                        const ved = {
+                            address: response.data.data.address,
+                            abi: [
+                                "function name() view returns (string)",
+                                "function symbol() view returns (string)",
+                                "function gimmeSome() external",
+                                "function balanceOf(address _owner) public view returns (uint256 balance)",
+                                "function transfer(address _to, uint256 _value) public returns (bool success)",
+                            ],
+                        };
+                        await provider.send("eth_requestAccounts", []);
+                        const signer = provider.getSigner();
+                        const userAddress = await signer.getAddress();
+                        const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
+                        console.log('vedContract', vedContract);
+                        const vedBalance = await vedContract.balanceOf(userAddress);
+                        // console.log(6666, vedBalance);
+                        // vedBalance = ethers.utils.formatUnits(vedBalance, 1);
+                        // console.log('vedBalance', vedBalance);
+
+                        if (token === '0.0') {
+                            const autoAddToken = async () => {
+                                const { ethereum } = window;
+                                try {
+                                    // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+                                    const wasAdded = await ethereum.request({
+                                        method: 'wallet_watchAsset',
+                                        params: {
+                                            type: 'ERC20', // Initially only supports ERC20, but eventually more!
+                                            options: {
+                                                address: tokenAddress, // The address that the token is at.
+                                                symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+                                                decimals: tokenDecimals, // The number of decimals in the token
+                                            },
+                                        },
+                                    });
+
+                                    if (wasAdded) {
+                                        console.log('Thanks for your interest!');
+                                    } else {
+                                        console.log('Your loss!');
+                                    }
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+                            autoAddToken()
+                        }
+                    }
+                }
+                getVEDBalance()
             })
             .catch(Error => {
                 console.log(Error)
@@ -121,6 +139,10 @@ export default function App() {
 
     const handleSubmit = async (value) => {
         // store the states in the form data
+        const callBack = () => {
+            setIsModalVisible(false)
+            mintNftHandler()
+        }
         try {
             // make axios post request
             const response = await axios({
@@ -134,49 +156,16 @@ export default function App() {
                 },
                 headers: { "Content-Type": "application/json" },
             }).then(response => {
-                setTimeout(function () {
-                    alert("Nhập thông tin thành công");
-                }, 700);
+                callBack()
             });
         } catch (error) {
             console.log(error)
         }
     }
 
-    const tokenAddress  = token.address;
-    const tokenSymbol   = token.symbol;
+    const tokenAddress = token.address;
+    const tokenSymbol = token.symbol;
     const tokenDecimals = token.decimals;
-
-    useEffect(() => {
-        if (balanceVED === '0.0') {
-            const autoAddToken = async () => {
-                const { ethereum } = window;
-                try {
-                    // wasAdded is a boolean. Like any RPC method, an error may be thrown.
-                    const wasAdded = await ethereum.request({
-                        method: 'wallet_watchAsset',
-                        params: {
-                            type: 'ERC20', // Initially only supports ERC20, but eventually more!
-                            options: {
-                                address: tokenAddress, // The address that the token is at.
-                                symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-                                decimals: tokenDecimals, // The number of decimals in the token
-                            },
-                        },
-                    });
-
-                    if (wasAdded) {
-                        console.log('Thanks for your interest!');
-                    } else {
-                        console.log('Your loss!');
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-            autoAddToken()
-        }
-    }, [balanceVED])
 
     useEffect(() => {
         async function addPolygonTestnetNetwork() {
@@ -219,11 +208,23 @@ export default function App() {
 
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res) || console.log('RESS',res))
 
+                await ethereum.request({ method: 'eth_requestAccounts' }).then(res =>
+                    axios({
+                        method: "get",
+                        url: `${baseUrl}/api/v1.0/user/${res[0]}`,
+                    })
+                        .then(response => {
+                            setMyAddress(res)
+                            setCustomerData(response.data.data)
+                            console.log('customerData', customerData)
+                        })
+                        .catch(Error => {
+                            console.log(Error)
+                        }))
                 // Get Balance of Wallet
                 const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
-                const formatBalance  = ethers.utils.formatEther(initialBalance)
+                const formatBalance = ethers.utils.formatEther(initialBalance)
                 setBalanceETH(formatBalance)
                 console.log('balance', balanceETH);
             }
@@ -231,14 +232,14 @@ export default function App() {
         }
         fetchInitialData()
 
-    }, [ balanceETH ]);
+    }, [balanceETH]);
 
     const formatTransactionValue = (value) => {
         if (value) {
             return ethers.utils.formatEther(value)
         }
     }
-    const formatTransactionGas   = (gas) => {
+    const formatTransactionGas = (gas) => {
         if (gas) {
             return ethers.utils.formatEther(gas)
         }
@@ -250,7 +251,7 @@ export default function App() {
         }
     }
 
-    const pushTransactionInfo    = async () => {
+    const pushTransactionInfo = async () => {
         try {
             // make axios post request
             const response = await axios({
@@ -314,12 +315,11 @@ export default function App() {
 
     const mintNftHandler = async () => {
         try {
-            const { ethereum } = window;
-
+            const { ethereum } = window
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                const signer   = provider.getSigner();
-                const block    = await provider.getBlockNumber()
+                const signer = provider.getSigner();
+                const block = await provider.getBlockNumber()
                 setBlock(block)
 
                 console.log('block', block);
@@ -327,9 +327,7 @@ export default function App() {
 
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
-                if (!customerData) {
-                    setIsModalVisible(true)
-                }
+
                 let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("0.000001") });
                 setPaymentInfo(nftTxn)
 
@@ -362,8 +360,8 @@ export default function App() {
             const { ethereum } = window;
             if (ethereum) {
                 const provider = ethers.providers.getDefaultProvider('https://public-node.testnet.rsk.co');
-                const address  = '0xdB4e76a6B78424BbF2A4A182803fc534B8750bB4';
-                const abi      = [
+                const address = '0xdB4e76a6B78424BbF2A4A182803fc534B8750bB4';
+                const abi = [
                     {
                         "inputs": [
                             {
@@ -820,7 +818,7 @@ export default function App() {
                         "type": "function"
                     }
                 ];
-                const signer   = new ethers.VoidSigner(address, provider)
+                const signer = new ethers.VoidSigner(address, provider)
                 // const signer = provider.getSigner()
                 const contract = new ethers.Contract(address, abi, signer);
 
@@ -830,7 +828,7 @@ export default function App() {
                 // await signer.connect(provider);
 
                 console.log(6666, contract);
-                const options   = { value: ethers.utils.parseEther("1.0") }
+                const options = { value: ethers.utils.parseEther("1.0") }
                 let sendPromise = await contract.buyTokens(options);
 
                 console.log(33331222, sendPromise);
@@ -843,7 +841,7 @@ export default function App() {
 
     const connectWalletButton = () => {
         return (
-            <button onClick={ connectWalletHandler } className='cta-button connect-wallet-button'>
+            <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
                 Connect Wallet
             </button>
         )
@@ -852,13 +850,21 @@ export default function App() {
     const mintNftButton = () => {
         return (
             <div>
-                <button className='main-mint-btn '
-                        onClick={ () => {
-                            mintNftHandler();
-                        } }>
-                    Mua xe
-                </button>
-            </div>
+                {!customerData ?
+                    <button className='main-mint-btn '
+                        onClick={() => {
+                            setIsModalVisible(true)
+                        }}>
+                        Enter information for Buy Car
+                    </button>
+                    : <button className='main-mint-btn '
+                        onClick={() => {
+                            mintNftHandler()
+                        }}>
+                        Buy car
+                    </button>
+                }
+            </div >
         )
     }
 
@@ -866,10 +872,10 @@ export default function App() {
         return (
             <div>
                 <button className='main-mint-btn '
-                        onClick={ () => {
-                            buyNftToken();
-                        } }>
-                    Mua token
+                    onClick={() => {
+                        buyNftToken();
+                    }}>
+                    Buy Token
                 </button>
             </div>
         )
@@ -881,64 +887,66 @@ export default function App() {
 
     return (
         <div className="App">
-            <Navbar address={myAddress[0]} fullName={customerData?.full_name} phone={customerData?.phone}/>
-            {/* MAIN BANNER */ }
-            <div className="main-card-wrapper" style={ { backgroundImage: `url(${ mainBgImage })` } }>
+            {customerData && (
+                <Navbar address={myAddress[0]} fullName={customerData?.full_name} phone={customerData?.phone} />
+            )}
+            {/* MAIN BANNER */}
+            <div className="main-card-wrapper" style={{ backgroundImage: `url(${mainBgImage})` }}>
                 <div className="main-card__inner-wrapper">
-                    <h1 className="header-txt" style={ { color: '#170426' } }>Vinfast Smart Contract</h1>
+                    <h1 className="header-txt" style={{ color: '#170426' }}>Vinfast Smart Contract</h1>
 
                     <h2>
                         <div>
-                            { myAddress ? mintNftButton() : connectWalletButton() }
+                            {myAddress ? mintNftButton() : connectWalletButton()}
                         </div>
                         <div>
-                            { buyToken() }
+                            {buyToken()}
                         </div>
                         <div>
-                            { `Balance ETH: ${ balanceETH }` }
+                            {`Balance ETH: ${balanceETH}`}
                         </div>
                         <div>
-                            { `Balance VED: ${ balanceVED }` }
+                            {`Balance VED: ${balanceVED}`}
                         </div>
                     </h2>
 
                 </div>
             </div>
 
-            {/* CAR LIST */ }
+            {/* CAR LIST */}
             <div className="cards-wrapper">
-                { apes.map((ape, index) => (
-                    <div className="cards-item" key={ index }>
+                {apes.map((ape, index) => (
+                    <div className="cards-item" key={index}>
                         <div className="img-wrapper">
-                            <img src={ ape.img } alt={ `ape_${ index }` }/>
+                            <img src={ape.img} alt={`ape_${index}`} />
                         </div>
                         <div className="btn-wrapper">
                             <div>
-                                { myAddress ? mintNftButton() : connectWalletButton() }
+                                {myAddress ? mintNftButton() : connectWalletButton()}
                             </div>
 
                         </div>
                     </div>
-                )) }
+                ))}
             </div>
 
-            <Modal title="User Information" visible={ isModalVisible } onOk={ handleOk } onCancel={ handleCancel }>
+            <Modal title="User Information" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} footer={null}>
                 <Form name="nest-messages"
-                      labelCol={ {
-                          flex: '100px',
-                      } }
-                      labelAlign="left"
-                      onFinish={ handleSubmit }>
-                    <Form.Item name={ [ 'user', 'full_name' ] } label="Full name" rules={ [ { required: true } ] }>
-                        <Input/>
+                    labelCol={{
+                        flex: '100px',
+                    }}
+                    labelAlign="left"
+                    onFinish={handleSubmit}>
+                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
+                        <Input />
                     </Form.Item>
-                    <Form.Item name={ [ 'user', 'phone' ] } label="Phone" rules={ [ { required: true } ] }>
-                        <Input/>
+                    <Form.Item name={['user', 'phone']} label="Phone" rules={[{ required: true }]}>
+                        <Input />
                     </Form.Item>
-                    <Form.Item name={ [ 'user', 'address' ] } label="Address" rules={ [ { required: true } ] }>
-                        <Input.TextArea/>
+                    <Form.Item name={['user', 'address']} label="Address" rules={[{ required: true }]}>
+                        <Input.TextArea />
                     </Form.Item>
-                    <Form.Item wrapperCol={ { offset: 8, marginRight: '20px' } }>
+                    <Form.Item style={{ marginLeft: '75px', marginRight: '75px' }}>
                         <Button type="primary" htmlType="submit" block>
                             Gửi
                         </Button>
