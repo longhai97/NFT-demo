@@ -96,9 +96,9 @@ export default function App() {
                         const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
                         console.log('vedContract', vedContract);
                         const vedBalance = await vedContract.balanceOf(userAddress);
-                        // console.log(6666, vedBalance);
-                        // vedBalance = ethers.utils.formatUnits(vedBalance, 1);
-                        // console.log('vedBalance', vedBalance);
+                        console.log(6666, vedBalance);
+                        vedBalance = ethers.utils.formatUnits(vedBalance, 1);
+                        console.log('vedBalance', vedBalance);
 
                         if (token === '0.0') {
                             const autoAddToken = async () => {
