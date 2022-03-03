@@ -185,11 +185,12 @@ export default function App() {
         // Get Current Address Wallet
     }
 
+
     useEffect(() => {
         console.log('isRun_after_useEffect', isRunAddNetwork);
         console.log('errorCode_after_useEffect', errorCode);
         console.log('addedNetWork', addedNetwork);
-        if (addedNetwork && networkID === '31') {
+        if (addedNetwork && networkID && networkID === '31') {
             axios({
                 method: "get",
                 url: `${baseUrl}/api/v1.0/contract/erc20`,
