@@ -24,7 +24,6 @@ export default function App() {
     const [paymentInfo, setPaymentInfo] = useState('');
     const [balanceETH, setBalanceETH] = useState('');
     const [balanceVED, setBalanceVED] = useState('');
-    console.log('balanceVED', balanceVED);
     const [myAddress, setMyAddress] = useState('');
     const [customerData, setCustomerData] = useState({});
     const [token, setToken] = useState({})
@@ -36,7 +35,9 @@ export default function App() {
     const [errorCode, setErrorCode] = useState();
     const [addedNetwork, setAddedNetwork] = useState(true);
 
-    // getVEDBalance();
+     const {ethereum} = window
+    const networkID = ethereum.networkVersion
+
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -126,23 +127,6 @@ export default function App() {
         }
     }
 
-    const tokenAddress = token.address;
-    const tokenSymbol = token.symbol;
-    const tokenDecimals = token.decimals;
-
-    const { ethereum } = window
-    const isMetaMaskConnected = () => ethereum.isConnected()
-
-    const getChainId = async () => {
-        const chainId = await ethereum.request({ method: 'eth_chainId' })
-        console.log('chainId', chainId)
-    }
-
-    const getNetworkId = async () => {
-        const networkId = await ethereum.request({ method: 'net_version' })
-        console.log(networkId)
-    }
-
     useEffect(() => {
         async function addPolygonTestnetNetwork() {
             const { ethereum } = window;
@@ -185,7 +169,6 @@ export default function App() {
     }, []);
 
     const fetchInitialData = async () => {
-        console.log('====run====')
         // Crete Provider
         const { ethereum } = window;
 
@@ -194,7 +177,7 @@ export default function App() {
             ethereum.request({ method: 'eth_requestAccounts' }).then(res => setMyAddress(res) || console.log('RESS', res))
 
             // Get Balance of Wallet
-            const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
+            const initialBalance = await provider.getBalance(`${myAddress[0]}`)
             const formatBalance = ethers.utils.formatEther(initialBalance)
             setBalanceETH(formatBalance)
             console.log('balance', balanceETH);
@@ -206,7 +189,7 @@ export default function App() {
         console.log('isRun_after_useEffect', isRunAddNetwork);
         console.log('errorCode_after_useEffect', errorCode);
         console.log('addedNetWork', addedNetwork);
-        if (addedNetwork) {
+        if (addedNetwork && networkID === '31') {
             axios({
                 method: "get",
                 url: `${baseUrl}/api/v1.0/contract/erc20`,
