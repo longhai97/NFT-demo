@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import {useEffect, useLayoutEffect, useState} from 'react';
 import {
     Modal,
     Form,
@@ -9,14 +9,15 @@ import 'antd/dist/antd.css';
 import './App.css';
 import axios from 'axios';
 import contract from './contracts/NFTCollectible.json';
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 import Navbar from "./Nav/Navbar";
 import history from "history";
+import {ConnectionInfo} from "ethers/lib/utils";
+import {network} from "hardhat";
 
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
 const abi = contract.abi;
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
-
 
 export default function App() {
     const [currentAccount, setCurrentAccount] = useState(null);
@@ -33,8 +34,9 @@ export default function App() {
     const [form] = Form.useForm();
     const transitionData = [paymentInfo.nonce, paymentInfo.from, paymentInfo.chainId]
     const [current, setCurrent] = useState('mail');
-
-
+    const [isRunAddNetwork, setIsRunAddNetwork] = useState(false)
+    const [errorCode, setErrorCode] = useState();
+    const [addedNetwork, setAddedNetwork] = useState(true);
 
     // getVEDBalance();
 
@@ -55,18 +57,18 @@ export default function App() {
 
     // Apes Image Data
     const apes = [
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806155.jpg' },
-        { img: 'https://wallpapercave.com/wp/wp8806278.jpg' },
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806155.jpg'},
+        {img: 'https://wallpapercave.com/wp/wp8806278.jpg'},
     ]
 
     useEffect(() => {
@@ -75,9 +77,9 @@ export default function App() {
                 method: "get",
                 url: `${baseUrl}/api/v1.0/user/${myAddress}`,
             })
-                .then( response => {
+                .then(response => {
                     setCustomerData(response.data.data)
-                    console.log('customerData',customerData)
+                    console.log('customerData', customerData)
                 })
                 .catch(Error => {
                     console.log(Error)
@@ -94,60 +96,6 @@ export default function App() {
             .then(response => {
                 console.log('response', response);
                 setToken(response.data.data)
-                async function getVEDBalance() {
-                    if (window.ethereum) {
-                        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                        const ved = {
-                            address: response.data.data.address,
-                            abi: [
-                                "function name() view returns (string)",
-                                "function symbol() view returns (string)",
-                                "function gimmeSome() external",
-                                "function balanceOf(address _owner) public view returns (uint256 balance)",
-                                "function transfer(address _to, uint256 _value) public returns (bool success)",
-                            ],
-                        };
-                        await provider.send("eth_requestAccounts", []);
-                        const signer = provider.getSigner();
-                        const userAddress = await signer.getAddress();
-                        const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
-                        console.log('vedContract', vedContract);
-                        const vedBalance = await vedContract.balanceOf(userAddress);
-                        console.log(6666, vedBalance);
-                        vedBalance = ethers.utils.formatUnits(vedBalance, 1);
-                        console.log('vedBalance', vedBalance);
-
-                        if (token === '0.0') {
-                            const autoAddToken = async () => {
-                                const { ethereum } = window;
-                                try {
-                                    // wasAdded is a boolean. Like any RPC method, an error may be thrown.
-                                    const wasAdded = await ethereum.request({
-                                        method: 'wallet_watchAsset',
-                                        params: {
-                                            type: 'ERC20', // Initially only supports ERC20, but eventually more!
-                                            options: {
-                                                address: tokenAddress, // The address that the token is at.
-                                                symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-                                                decimals: tokenDecimals, // The number of decimals in the token
-                                            },
-                                        },
-                                    });
-
-                                    if (wasAdded) {
-                                        console.log('Thanks for your interest!');
-                                    } else {
-                                        console.log('Your loss!');
-                                    }
-                                } catch (error) {
-                                    console.log(error);
-                                }
-                            }
-                            autoAddToken()
-                        }
-                    }
-                }
-                getVEDBalance()
             })
             .catch(Error => {
                 console.log(Error)
@@ -171,7 +119,7 @@ export default function App() {
                     address: value.user.address,
                     wallet: myAddress.toString()
                 },
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
             }).then(response => {
                 callBack()
             });
@@ -184,72 +132,114 @@ export default function App() {
     const tokenSymbol = token.symbol;
     const tokenDecimals = token.decimals;
 
+    const {ethereum} = window
+    const isMetaMaskConnected = () => ethereum.isConnected()
+
+    const getChainId = async () => {
+        const chainId = await ethereum.request({method: 'eth_chainId'})
+        console.log('chainId',chainId)
+    }
+
+    const getNetworkId = async () => {
+        const networkId = await ethereum.request({method: 'net_version'})
+        console.log(networkId)
+    }
+
     useEffect(() => {
+
         async function addPolygonTestnetNetwork() {
-            const { ethereum } = window;
+            const {ethereum} = window;
             try {
                 await ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1f' }],
+                    params: [{chainId: '0x1f'}],
                 });
             } catch (error) {
+                console.log('ERROR_LOG', error);
                 if (error.code === 4902) {
+                    setErrorCode(4902);
                     try {
-                        await ethereum.request({
+                        const wasAddedNetWork = await ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [{
-                                chainId: '0x1f',
+                                chainId: '0x1F',
                                 chainName: "RSK Testnet",
                                 nativeCurrency: {
                                     name: "	tRBTC",
                                     symbol: ":tRBTC",
+                                    decimals: 18
                                 },
                                 rpcUrls: ["https://public-node.testnet.rsk.co"],
                                 blockExplorerUrls: ["https://explorer.testnet.rsk.co"],
                             }],
                         });
-                        console.log('hihihihihi');
+                        setAddedNetwork(wasAddedNetWork)
                     } catch (addError) {
                         console.log('Did not add network');
                     }
                 }
             }
+            setIsRunAddNetwork(true);
         }
+
         addPolygonTestnetNetwork()
-    })
+        console.log('set_IsRun_TRUE', isRunAddNetwork);
 
-    useLayoutEffect(() => {
-        const fetchInitialData = async () => {
-            // Crete Provider
-            const { ethereum } = window;
+    }, []);
 
-            if (ethereum) {
-                const provider = new ethers.providers.Web3Provider(ethereum);
+    const fetchInitialData = async () => {
+        console.log('====run====')
+        // Crete Provider
+        const {ethereum} = window;
 
-                await ethereum.request({ method: 'eth_requestAccounts' }).then(res =>
-                    axios({
-                        method: "get",
-                        url: `${baseUrl}/api/v1.0/user/${res[0]}`,
-                    })
-                        .then(response => {
-                            setMyAddress(res)
-                            setCustomerData(response.data.data)
-                            console.log('customerData', customerData)
-                        })
-                        .catch(Error => {
-                            console.log(Error)
-                        }))
-                // Get Balance of Wallet
-                const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
-                const formatBalance = ethers.utils.formatEther(initialBalance)
-                setBalanceETH(formatBalance)
-                console.log('balance', balanceETH);
-            }
-            // Get Current Address Wallet
+        if (ethereum) {
+            const provider = new ethers.providers.Web3Provider(ethereum);
+            ethereum.request({method: 'eth_requestAccounts'}).then(res => setMyAddress(res) || console.log('RESS', res))
+
+            // Get Balance of Wallet
+            const initialBalance = await provider.getBalance('0x0161d8F7FFcb0f50c3bD24707ddEE7c57A5c6758')
+            const formatBalance = ethers.utils.formatEther(initialBalance)
+            setBalanceETH(formatBalance)
+            console.log('balance', balanceETH);
         }
-        fetchInitialData()
+        // Get Current Address Wallet
+    }
 
-    }, [balanceETH]);
+    useEffect(() => {
+        console.log('isRun_after_useEffect', isRunAddNetwork);
+        console.log('errorCode_after_useEffect', errorCode);
+        console.log('addedNetWork', addedNetwork);
+        if (addedNetwork) {
+            async function getVEDBalance() {
+                if (window.ethereum) {
+                    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                    const ved = {
+                        //change address dynamic ( get address from API )
+                        address: "0x1ac47af74031B51B59D6477C150cAe4a9dF2230F",
+                        abi: [
+                            "function name() view returns (string)",
+                            "function symbol() view returns (string)",
+                            "function gimmeSome() external",
+                            "function balanceOf(address _owner) public view returns (uint256 balance)",
+                            "function transfer(address _to, uint256 _value) public returns (bool success)",
+                        ],
+                    };
+                    await provider.send("eth_requestAccounts", []);
+                    const signer = provider.getSigner();
+                    let userAddress = await signer.getAddress();
+                    const vedContract = new ethers.Contract(ved.address, ved.abi, signer);
+                    let vedBalance = await vedContract.balanceOf(userAddress);
+                    vedBalance = ethers.utils.formatUnits(vedBalance, 1);
+                    setBalanceVED(vedBalance)
+                    console.log('vedBalance', vedBalance);
+                }
+            }
+
+            getVEDBalance();
+            fetchInitialData()
+        }
+
+    }, [balanceVED]);
 
     const formatTransactionValue = (value) => {
         if (value) {
@@ -285,7 +275,7 @@ export default function App() {
                     wallet: myAddress.toString(),
                     status: 'SUCCESSFUL'
                 },
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
             }).then(response => {
                 setTimeout(function () {
                     alert("Giao dịch thành công");
@@ -296,13 +286,13 @@ export default function App() {
         }
     }
     const checkWalletIsConnected = async () => {
-        const { ethereum } = window;
+        const {ethereum} = window;
 
         if (!ethereum) {
             console.log('chưa có metamask');
             return;
         }
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        const accounts = await ethereum.request({method: 'eth_accounts'});
 
         if (accounts.length !== 0) {
             const account = accounts[0];
@@ -315,14 +305,14 @@ export default function App() {
     }
 
     const connectWalletHandler = async () => {
-        const { ethereum } = window;
+        const {ethereum} = window;
 
         if (!ethereum) {
             alert("Hãy cài ví Metamask!");
         }
 
         try {
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            const accounts = await ethereum.request({method: 'eth_requestAccounts'});
             console.log("Found an account! Address: ", accounts[0]);
             setCurrentAccount(accounts[0]);
         } catch (err) {
@@ -332,7 +322,8 @@ export default function App() {
 
     const mintNftHandler = async () => {
         try {
-            const { ethereum } = window
+            const {ethereum} = window;
+
             if (ethereum) {
                 const provider = new ethers.providers.Web3Provider(ethereum);
                 const signer = provider.getSigner();
@@ -343,8 +334,10 @@ export default function App() {
                 const blockInfo = await provider.getBlock(block)
 
                 const nftContract = new ethers.Contract(contractAddress, abi, signer);
-
-                let nftTxn = await nftContract.mintNFTs(1, { value: ethers.utils.parseEther("0.000001") });
+                if (!customerData) {
+                    setIsModalVisible(true)
+                }
+                let nftTxn = await nftContract.mintNFTs(1, {value: ethers.utils.parseEther("0.000001")});
                 setPaymentInfo(nftTxn)
 
                 setTimeout(function () {
@@ -356,8 +349,6 @@ export default function App() {
                 const someThing = await signer.getGasPrice();
                 console.log('someThing', someThing);
 
-                // let balance = await provider.getBalance('0x805e67770511B4BF80c3adf726Ab4E470838fC58')
-                // console.log('balance', balance);
                 if (nftTxn) {
                     setTransistion(nftTxn)
                 }
@@ -373,7 +364,7 @@ export default function App() {
 
     const buyNftToken = async () => {
         try {
-            const { ethereum } = window;
+            const {ethereum} = window;
             if (ethereum) {
                 const provider = ethers.providers.getDefaultProvider('https://public-node.testnet.rsk.co');
                 const address = '0xdB4e76a6B78424BbF2A4A182803fc534B8750bB4';
@@ -844,7 +835,7 @@ export default function App() {
                 // await signer.connect(provider);
 
                 console.log(6666, contract);
-                const options = { value: ethers.utils.parseEther("1.0") }
+                const options = {value: ethers.utils.parseEther("1.0")}
                 let sendPromise = await contract.buyTokens(options);
 
                 console.log(33331222, sendPromise);
@@ -868,19 +859,19 @@ export default function App() {
             <div>
                 {!customerData ?
                     <button className='main-mint-btn '
-                        onClick={() => {
-                            setIsModalVisible(true)
-                        }}>
+                            onClick={() => {
+                                setIsModalVisible(true)
+                            }}>
                         Enter information for Buy Car
                     </button>
                     : <button className='main-mint-btn '
-                        onClick={() => {
-                            mintNftHandler()
-                        }}>
+                              onClick={() => {
+                                  mintNftHandler()
+                              }}>
                         Buy car
                     </button>
                 }
-            </div >
+            </div>
         )
     }
 
@@ -888,9 +879,9 @@ export default function App() {
         return (
             <div>
                 <button className='main-mint-btn '
-                    onClick={() => {
-                        buyNftToken();
-                    }}>
+                        onClick={() => {
+                            buyNftToken();
+                        }}>
                     Buy Token
                 </button>
             </div>
@@ -904,12 +895,12 @@ export default function App() {
     return (
         <div className="App">
             {customerData && (
-                <Navbar address={myAddress[0]} fullName={customerData?.full_name} phone={customerData?.phone} />
+                <Navbar address={myAddress[0]} fullName={customerData?.full_name} phone={customerData?.phone}/>
             )}
             {/* MAIN BANNER */}
-            <div className="main-card-wrapper" style={{ backgroundImage: `url(${mainBgImage})` }}>
+            <div className="main-card-wrapper" style={{backgroundImage: `url(${mainBgImage})`}}>
                 <div className="main-card__inner-wrapper">
-                    <h1 className="header-txt" style={{ color: '#170426' }}>Vinfast Smart Contract</h1>
+                    <h1 className="header-txt" style={{color: '#170426'}}>Vinfast Smart Contract</h1>
 
                     <h2>
                         <div>
@@ -934,7 +925,7 @@ export default function App() {
                 {apes.map((ape, index) => (
                     <div className="cards-item" key={index}>
                         <div className="img-wrapper">
-                            <img src={ape.img} alt={`ape_${index}`} />
+                            <img src={ape.img} alt={`ape_${index}`}/>
                         </div>
                         <div className="btn-wrapper">
                             <div>
@@ -946,23 +937,24 @@ export default function App() {
                 ))}
             </div>
 
-            <Modal title="User Information" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} footer={null}>
+            <Modal title="User Information" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
+                   footer={null}>
                 <Form name="nest-messages"
-                    labelCol={{
-                        flex: '100px',
-                    }}
-                    labelAlign="left"
-                    onFinish={handleSubmit}>
-                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{ required: true }]}>
-                        <Input />
+                      labelCol={{
+                          flex: '100px',
+                      }}
+                      labelAlign="left"
+                      onFinish={handleSubmit}>
+                    <Form.Item name={['user', 'full_name']} label="Full name" rules={[{required: true}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name={['user', 'phone']} label="Phone" rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item name={['user', 'phone']} label="Phone" rules={[{required: true}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name={['user', 'address']} label="Address" rules={[{ required: true }]}>
-                        <Input.TextArea />
+                    <Form.Item name={['user', 'address']} label="Address" rules={[{required: true}]}>
+                        <Input.TextArea/>
                     </Form.Item>
-                    <Form.Item style={{ marginLeft: '75px', marginRight: '75px' }}>
+                    <Form.Item style={{marginLeft: '75px', marginRight: '75px'}}>
                         <Button type="primary" htmlType="submit" block>
                             Gửi
                         </Button>
