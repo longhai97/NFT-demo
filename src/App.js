@@ -11,9 +11,7 @@ import axios from 'axios';
 import contract from './contracts/NFTCollectible.json';
 import {ethers} from 'ethers';
 import Navbar from "./Nav/Navbar";
-import history from "history";
-import {ConnectionInfo} from "ethers/lib/utils";
-import {network} from "hardhat";
+
 
 const contractAddress = "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097";
 const abi = contract.abi;
